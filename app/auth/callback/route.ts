@@ -4,6 +4,15 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
+  const error = searchParams.get("error");
+  const error_description = searchParams.get("error_description");
+
+  if (error) {
+    console.error("Auth error:", error, error_description);
+    return NextResponse.redirect(
+      new URL(`/login?error=${encodeURIComponent(error_description || error)}`, request.url)
+    );
+  }
 
   if (code) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -23,24 +32,13 @@ export async function GET(request: NextRequest) {
       if (error) {
         console.error("Auth error:", error);
         return NextResponse.redirect(
-          new URL(`/login?error=${error.message}`, request.url)
+          new URL(`/login?error=${encodeURIComponent(error.message)}`, request.url)
         );
       }
 
       if (data.session) {
-        const response = NextResponse.redirect(
-          new URL("/dashboard", request.url)
-        );
-
-        // Set auth cookie
-        response.cookies.set("sb-auth-token", data.session.access_token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          maxAge: 60 * 60 * 24 * 7, // 7 days
-        });
-
-        return response;
+        // Redirect to dashboard - Supabase automatically handles session storage
+        return NextResponse.redirect(new URL("/dashboard", request.url));
       }
     } catch (error) {
       console.error("Callback error:", error);

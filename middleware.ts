@@ -4,21 +4,24 @@ const PUBLIC_ROUTES = ["/login", "/signup", "/"];
 
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  const authToken = request.cookies.get("sb-auth-token");
 
-  // If user is authenticated and tries to access login/signup, redirect to dashboard
-  if (authToken && (pathname === "/login" || pathname === "/signup")) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+  // Allow auth callback to complete
+  if (pathname.startsWith("/auth")) {
+    return NextResponse.next();
   }
 
-  // If user is not authenticated and tries to access protected routes, redirect to login
-  if (!authToken && !PUBLIC_ROUTES.includes(pathname) && pathname !== "/auth") {
-    // Don't redirect if it's an API route or callback
-    if (!pathname.startsWith("/api") && !pathname.startsWith("/auth")) {
-      return NextResponse.redirect(new URL("/login", request.url));
-    }
+  // Allow public routes
+  if (PUBLIC_ROUTES.includes(pathname)) {
+    return NextResponse.next();
   }
 
+  // Allow API routes
+  if (pathname.startsWith("/api")) {
+    return NextResponse.next();
+  }
+
+  // For protected routes, let the client-side AuthProvider handle redirects
+  // This prevents middleware from blocking before session is restored
   return NextResponse.next();
 }
 

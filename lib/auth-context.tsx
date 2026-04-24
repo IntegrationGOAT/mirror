@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { Session, User } from "@supabase/supabase-js";
-import { onAuthStateChange } from "@/lib/auth";
+import { onAuthStateChange, getSession } from "@/lib/auth";
 
 interface AuthContextType {
   user: User | null;
@@ -19,10 +19,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // First, check if there's an existing session (from localStorage after OAuth)
+    const initializeSession = async () => {
+      const session = await getSession();
+      if (session?.user) {
+        setUser(session.user);
+        setSession(session);
+      }
+      setLoading(false);
+    };
+
+    initializeSession();
+
+    // Then listen for auth state changes
     const { data } = onAuthStateChange((user, session) => {
       setUser(user);
       setSession(session);
-      setLoading(false);
     });
 
     return () => {

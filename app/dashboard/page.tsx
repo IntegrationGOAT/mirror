@@ -1,5 +1,6 @@
 "use client";
 
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Navbar } from "@/components/layout/Navbar";
 import { Card } from "@/components/ui/Card";
 import { DailyLogForm } from "@/components/dashboard/DailyLogForm";
@@ -79,8 +80,9 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] bg-[radial-gradient(ellipse_at_top_right,rgba(124,58,237,0.05),transparent_50%),radial-gradient(ellipse_at_bottom_left,rgba(59,111,255,0.05),transparent_50%)]">
-      <Navbar />
+    <ProtectedRoute>
+      <div className="min-h-screen bg-[var(--bg-primary)] bg-[radial-gradient(ellipse_at_top_right,rgba(124,58,237,0.05),transparent_50%),radial-gradient(ellipse_at_bottom_left,rgba(59,111,255,0.05),transparent_50%)]">
+        <Navbar />
       <main className="mx-auto grid max-w-7xl gap-6 px-6 py-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_minmax(0,1fr)]">
         <Card className="flex flex-col gap-6 border-white/5 bg-white/[0.02] backdrop-blur-xl">
           <div>
@@ -167,5 +169,6 @@ export default function DashboardPage() {
         />
       </main>
     </div>
+    </ProtectedRoute>
   );
 }
