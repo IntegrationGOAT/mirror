@@ -32,7 +32,7 @@ const page = () => {
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <Link
-            href="/onboarding"
+            href="/login"
             className="inline-flex w-full items-center justify-center rounded-full bg-(--accent-blue) px-7 py-4 text-sm font-semibold text-white shadow-[0_0_30px_rgba(59,111,255,0.28)] transition-transform duration-300 hover:-translate-y-0.5 hover:bg-[#4d7dff] sm:w-auto"
           >
             Begin
