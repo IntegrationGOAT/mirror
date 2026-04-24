@@ -46,8 +46,8 @@ const LoginPage = () => {
         <div className="absolute inset-y-0 left-1/2 hidden w-px bg-white/7 lg:block" />
       </div>
 
-      <div className="relative mx-auto grid min-h-screen w-full max-w-330 items-center gap-12 px-6 py-10 lg:grid-cols-2 lg:px-12">
-        <section className="flex flex-col items-center justify-center gap-12">
+      <div className="relative mx-auto grid min-h-screen w-full max-w-7xl items-center gap-10 px-6 py-10 lg:grid-cols-2 lg:px-12">
+        <section className="flex flex-col items-center justify-center gap-10">
           <div className="relative h-75 w-75">
             <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,189,88,0.42)_0%,rgba(155,92,255,0.18)_48%,transparent_74%)] blur-xl" />
             <div className="absolute left-1/2 top-1/2 h-44.5 w-44.5 -translate-x-1/2 -translate-y-1/2">
@@ -68,8 +68,8 @@ const LoginPage = () => {
           </div>
 
           <div className="space-y-5 text-center">
-            <h1 className="text-[clamp(3.2rem,7vw,5.6rem)] font-black tracking-tighter">Mirror</h1>
-            <p className="mx-auto max-w-xl text-[clamp(1.15rem,2.1vw,2rem)] font-medium italic leading-relaxed text-white/60">
+            <h1 className="text-[clamp(2.8rem,6vw,4.8rem)] font-black tracking-tighter">Mirror</h1>
+            <p className="mx-auto max-w-xl text-[clamp(1rem,1.8vw,1.6rem)] font-medium italic leading-relaxed text-white/60">
               &quot;A digital twin that doesn&apos;t just reflect you
               <span className="mx-2">-</span>
               it reveals who you&apos;re becoming.&quot;
@@ -77,11 +77,11 @@ const LoginPage = () => {
           </div>
         </section>
 
-        <section className="mx-auto w-full max-w-160 rounded-[28px] border border-white/10 bg-black/20 p-7 shadow-[0_24px_70px_rgba(0,0,0,0.55)] backdrop-blur-xl sm:p-10">
+        <section className="mx-auto w-full max-w-2xl rounded-[28px] border border-white/10 bg-black/20 p-7 shadow-[0_24px_70px_rgba(0,0,0,0.55)] backdrop-blur-xl sm:p-10">
           <div className="space-y-8">
             <div className="space-y-2">
-              <h2 className="text-[clamp(2rem,4vw,3.4rem)] font-extrabold tracking-[-0.035em]">Welcome back.</h2>
-              <p className="text-xl text-white/55">Your twin has been waiting.</p>
+              <h2 className="text-[clamp(1.8rem,3vw,2.8rem)] font-extrabold tracking-[-0.035em]">Welcome back.</h2>
+              <p className="text-lg text-white/55">Your twin has been waiting.</p>
             </div>
 
             <form onSubmit={handleSignIn} className="space-y-6">
