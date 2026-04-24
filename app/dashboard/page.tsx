@@ -70,10 +70,10 @@ export default function DashboardPage() {
 
   if (!hydrated) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[var(--bg-primary)]">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-[var(--accent-purple)] border-t-transparent" />
-          <p className="text-sm font-bold uppercase tracking-[0.4em] text-[var(--text-secondary)]">Syncing Mirror...</p>
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-(--accent-purple) border-t-transparent" />
+          <p className="text-sm font-bold uppercase tracking-[0.4em] text-(--text-secondary)">Syncing Mirror...</p>
         </div>
       </div>
     );
@@ -81,12 +81,12 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-[var(--bg-primary)] bg-[radial-gradient(ellipse_at_top_right,rgba(124,58,237,0.05),transparent_50%),radial-gradient(ellipse_at_bottom_left,rgba(59,111,255,0.05),transparent_50%)]">
+      <div className="min-h-screen bg-background bg-[radial-gradient(ellipse_at_top_right,rgba(124,58,237,0.05),transparent_50%),radial-gradient(ellipse_at_bottom_left,rgba(59,111,255,0.05),transparent_50%)]">
         <Navbar />
       <main className="mx-auto grid max-w-7xl gap-6 px-6 py-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_minmax(0,1fr)]">
-        <Card className="flex flex-col gap-6 border-white/5 bg-white/[0.02] backdrop-blur-xl">
+        <Card className="flex flex-col gap-6 border-white/5 bg-white/2 backdrop-blur-xl">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[var(--text-secondary)]">Input Layer</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-(--text-secondary)">Input Layer</p>
             <h1 className="mt-2 text-3xl font-bold text-white tracking-tight">Daily Sync</h1>
           </div>
           <DailyLogForm
@@ -134,7 +134,7 @@ export default function DashboardPage() {
           />
         </Card>
 
-        <Card className="flex flex-col items-center justify-between gap-10 border-white/5 bg-white/[0.02] backdrop-blur-xl py-10">
+        <Card className="flex flex-col items-center justify-between gap-10 border-white/5 bg-white/2 backdrop-blur-xl py-10">
           <DivergenceGauge
             score={latestLog?.divergence_score ?? latestScore}
             animatedScore={isLoading ? 50 : latestLog?.divergence_score ?? latestScore}
