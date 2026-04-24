@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -24,7 +24,21 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    // Prepare a redirect response first so the Supabase SSR client can attach cookies to it.
+    const redirectResponse = NextResponse.redirect(new URL("/dashboard", request.url));
+
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            redirectResponse.cookies.set(name, value, options);
+          });
+        },
+      },
+    });
 
     try {
       const { data, error } = await supabase.auth.exchangeCodeForSession(code);
@@ -37,8 +51,7 @@ export async function GET(request: NextRequest) {
       }
 
       if (data.session) {
-        // Redirect to dashboard - Supabase automatically handles session storage
-        return NextResponse.redirect(new URL("/dashboard", request.url));
+        return redirectResponse;
       }
     } catch (error) {
       console.error("Callback error:", error);
