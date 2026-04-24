@@ -28,9 +28,10 @@ export async function generateGeminiText(prompt: string): Promise<GeminiTextResp
     },
   );
 
-  if (!response.ok) {
-    throw new Error(`Gemini request failed: ${response.status}`);
-  }
+if (!response.ok) {
+  const errText = await response.text();
+  throw new Error(`Gemini request failed: ${response.status} - ${errText}`);
+}
 
   const payload = (await response.json()) as {
     candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
