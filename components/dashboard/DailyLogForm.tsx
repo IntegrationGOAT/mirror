@@ -30,6 +30,9 @@ export function DailyLogForm({ onSubmit }: DailyLogFormProps) {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    
+    if (!decision.trim()) return;
+
     const scoreCommentary =
       goalStatus === "behind"
         ? "You are moving, but not toward the thing you keep claiming matters most."
@@ -151,7 +154,7 @@ export function DailyLogForm({ onSubmit }: DailyLogFormProps) {
         <Textarea className="mt-3 min-h-24 bg-white/5 transition-all focus:bg-white/10" value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Anything your twin should know?" />
       </div>
 
-      <Button className="w-full">Submit Log</Button>
+      <Button className="w-full" disabled={!decision.trim()}>Submit Log</Button>
     </form>
   );
 }

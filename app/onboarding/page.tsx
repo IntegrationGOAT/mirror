@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { TwinPersonaCard } from "@/components/onboarding/TwinPersonaCard";
+import { useMirrorStore } from "@/hooks/useMirrorStore";
 import type { OnboardingAnswers, TwinPersona } from "@/types";
 
 const questions = [

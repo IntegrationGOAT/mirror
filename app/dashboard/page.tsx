@@ -50,7 +50,7 @@ const seedLogs: DailyLog[] = [
 ];
 
 export default function DashboardPage() {
-  const { hydrated, logs, addLog, latestLog } = useMirrorStore();
+  const { hydrated, logs, addLog, latestLog, persona } = useMirrorStore();
   const [latestScore, setLatestScore] = useState(50);
   const [latestCommentary, setLatestCommentary] = useState<string | undefined>(undefined);
   const [latestTimestamp, setLatestTimestamp] = useState<string | undefined>(undefined);
@@ -102,6 +102,7 @@ export default function DashboardPage() {
                       goal_status: goalStatus,
                       notes,
                     },
+                    persona,
                   }),
                 });
 
@@ -139,9 +140,9 @@ export default function DashboardPage() {
             loading={isLoading}
           />
           <div className="flex w-full items-center justify-center gap-3 px-4">
-            {lastSeven.map((entry) => (
+            {lastSeven.map((entry, index) => (
               <div
-                key={entry.date}
+                key={`${entry.date}-${index}`}
                 title={`${formatDateLabel(entry.date)} · ${entry.score}%`}
                 className="h-2 w-full rounded-full bg-white/5 overflow-hidden"
               >

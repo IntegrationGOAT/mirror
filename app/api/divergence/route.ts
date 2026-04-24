@@ -23,20 +23,27 @@ export async function POST(request: Request) {
     const prompt = DIVERGENCE_SCORE_PROMPT(persona, logData);
     const response = await generateGeminiText(prompt);
     
-    let result = { divergence_score: 50, commentary: "Your twin is processing..." };
+    // Default fallback values
+    const moodScore = logData.mood ? 100 - (logData.mood * 20) : 50;
+    let result = { 
+      divergence_score: Math.max(0, Math.min(100, Math.round(moodScore))), 
+      commentary: "I see your patterns. Your mood and choices are creating a specific trajectory. Keep logging to sharpen the reflection." 
+    };
     
-    try {
-      // Extract JSON from response (sometimes Gemini wraps it in code blocks)
-      const jsonMatch = response.text.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        result = JSON.parse(jsonMatch[0]);
+    if (response.text) {
+      try {
+        // Extract JSON from response (sometimes Gemini wraps it in code blocks)
+        const jsonMatch = response.text.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          if (parsed.divergence_score !== undefined) result.divergence_score = parsed.divergence_score;
+          if (parsed.commentary) result.commentary = parsed.commentary;
+        }
+      } catch (e) {
+        console.error("Failed to parse Gemini response:", e);
       }
-    } catch (e) {
-      console.error("Failed to parse Gemini response:", e);
-      // Fallback to basic logic if AI fails
-      const moodScore = logData.mood ? 100 - logData.mood * 14 : 42;
-      result.divergence_score = Math.max(0, Math.min(100, Math.round(moodScore)));
-      result.commentary = "I see your patterns, but I'm having trouble articulating them right now. Keep logging.";
+    } else {
+       console.warn("Gemini returned an empty response, using fallback.");
     }
 
     return NextResponse.json({
