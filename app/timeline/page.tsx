@@ -8,6 +8,7 @@ import { useMirrorStore } from "@/hooks/useMirrorStore";
 import type { DailyLog } from "@/types";
 import { useMemo } from "react";
 
+
 const logs: DailyLog[] = [
   {
     id: "1",
@@ -49,7 +50,7 @@ const logs: DailyLog[] = [
 
 export default function TimelinePage() {
   const { logs } = useMirrorStore();
-  const visibleLogs = useMemo(() => (logs.length > 0 ? logs : seedLogs), [logs]);
+  const visibleLogs = useMemo(() => (logs.length > 0 ? logs : logs), [logs]);
 
   return (
     <>
@@ -72,7 +73,7 @@ export default function TimelinePage() {
             sampleSize={visibleLogs.length}
           />
         ) : (
-          <Card className="text-[var(--text-secondary)]">Log at least three days to reveal your projected self.</Card>
+          <Card className="text-(--text-secondary)">Log at least three days to reveal your projected self.</Card>
         )}
       </main>
     </>
