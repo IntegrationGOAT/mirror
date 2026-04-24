@@ -5,36 +5,53 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@base-ui/react/button";
 import { Input } from "@base-ui/react/input";
-import { signIn, signInWithGoogle } from "@/lib/auth";
+import { signUp, signInWithGoogle } from "@/lib/auth";
 
 const page = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-  const handleSignIn = async (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
+    setSuccess("");
 
-    const result = await signIn(email, password);
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+
+    setLoading(true);
+
+    const result = await signUp(email, password);
     if (result.success) {
-      router.push("/dashboard");
+      setSuccess("Check your email to confirm your account!");
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000);
     } else {
-      setError(result.message || "Failed to sign in");
+      setError(result.message || "Failed to sign up");
     }
     setLoading(false);
   };
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignUp = async () => {
     setLoading(true);
     setError("");
 
     const result = await signInWithGoogle();
     if (!result.success) {
-      setError(result.message || "Failed to sign in with Google");
+      setError(result.message || "Failed to sign up with Google");
     }
     setLoading(false);
   };
@@ -57,10 +74,10 @@ const page = () => {
 
           <div className="space-y-4">
             <h1 className="text-[clamp(2.4rem,6vw,4rem)] font-bold tracking-[-0.06em] text-white">
-              Welcome back.
+              Create your mirror.
             </h1>
             <p className="text-lg leading-8 text-[var(--text-secondary)] sm:text-xl">
-              Your twin has been waiting.
+              Meet your digital twin.
             </p>
           </div>
 
@@ -73,14 +90,19 @@ const page = () => {
         <section className="rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-[0_0_60px_rgba(0,0,0,0.35)] backdrop-blur-xl">
           <div className="space-y-8">
             <div className="space-y-3">
-              <p className="text-xs uppercase tracking-[0.35em] text-[var(--text-secondary)]">Welcome back.</p>
-              <h2 className="text-3xl font-bold text-white">Your twin has been waiting.</h2>
+              <p className="text-xs uppercase tracking-[0.35em] text-[var(--text-secondary)]">Welcome.</p>
+              <h2 className="text-3xl font-bold text-white">Create your account</h2>
             </div>
 
-            <form onSubmit={handleSignIn} className="space-y-6">
+            <form onSubmit={handleSignUp} className="space-y-6">
               {error && (
                 <div className="rounded-[1rem] border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
                   {error}
+                </div>
+              )}
+              {success && (
+                <div className="rounded-[1rem] border border-green-500/30 bg-green-500/10 p-4 text-sm text-green-400">
+                  {success}
                 </div>
               )}
               <div className="space-y-2">
@@ -90,7 +112,7 @@ const page = () => {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="atreya.sept@gmail.com"
+                  placeholder="your.email@gmail.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={loading}
@@ -106,9 +128,25 @@ const page = () => {
                 <Input
                   id="password"
                   type="password"
-                  placeholder="•••••"
+                  placeholder="••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading}
+                  required
+                  className="w-full rounded-[1rem] border border-white/10 bg-white/5 px-4 py-4 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none focus:border-[var(--accent-blue)] focus:ring-2 focus:ring-[rgba(59,111,255,0.16)] disabled:opacity-50"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="confirmPassword" className="text-xs uppercase tracking-[0.35em] text-[var(--text-secondary)]">
+                  Confirm Password
+                </label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   disabled={loading}
                   required
                   className="w-full rounded-[1rem] border border-white/10 bg-white/5 px-4 py-4 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none focus:border-[var(--accent-blue)] focus:ring-2 focus:ring-[rgba(59,111,255,0.16)] disabled:opacity-50"
@@ -120,7 +158,7 @@ const page = () => {
                 disabled={loading}
                 className="w-full rounded-[1rem] bg-gradient-to-r from-[#ff9d00] to-[#ff7b20] px-6 py-4 text-sm font-semibold text-black shadow-[0_20px_40px_rgba(255,149,42,0.25)] disabled:opacity-50"
               >
-                {loading ? "Signing in..." : "Enter Mirror →"}
+                {loading ? "Creating account..." : "Create Mirror →"}
               </Button>
             </form>
 
@@ -131,18 +169,18 @@ const page = () => {
             </div>
 
             <Button
-              onClick={handleGoogleSignIn}
+              onClick={handleGoogleSignUp}
               disabled={loading}
               type="button"
               className="w-full justify-center rounded-[1rem] border border-white/10 bg-white/5 px-6 py-4 text-sm font-semibold text-[var(--text-primary)] hover:bg-white/10 disabled:opacity-50"
             >
-              {loading ? "Signing in..." : "Google"}
+              {loading ? "Signing up..." : "Google"}
             </Button>
 
             <p className="text-sm text-[var(--text-muted)]">
-              Don&apos;t have an account?{' '}
-              <Link href="/signup" className="font-semibold text-[var(--accent-blue)] hover:text-white">
-                Sign up
+              Already have an account?{' '}
+              <Link href="/login" className="font-semibold text-[var(--accent-blue)] hover:text-white">
+                Sign in
               </Link>
             </p>
           </div>
