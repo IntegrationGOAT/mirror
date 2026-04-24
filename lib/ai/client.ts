@@ -8,7 +8,7 @@ export async function generateGeminiText(prompt: string): Promise<GeminiTextResp
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
-    return { text: "" };
+    throw new Error("GEMINI_API_KEY is missing in environment variables.");
   }
 
   const response = await fetch(

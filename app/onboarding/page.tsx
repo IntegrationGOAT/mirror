@@ -61,11 +61,16 @@ function buildPersona(answers: OnboardingAnswers): TwinPersona {
 
 export default function OnboardingPage() {
   const { updatePersona } = useMirrorStore();
+  const [mounted, setMounted] = useState(false);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<OnboardingAnswers>(initialAnswers);
   const [fileName, setFileName] = useState<string | null>(null);
   const [persona, setPersona] = useState<TwinPersona | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const saved = window.localStorage.getItem(storageKey);
@@ -89,6 +94,8 @@ export default function OnboardingPage() {
 
   const questionKey = useMemo(() => Object.keys(initialAnswers)[step] as keyof OnboardingAnswers, [step]);
 
+  if (!mounted) return null;
+
   const handleContinue = async () => {
     if (step < questions.length - 1) {
       setStep((current) => current + 1);
@@ -109,13 +116,16 @@ export default function OnboardingPage() {
         body: JSON.stringify({ answers, uploadedText: "" }), // TODO: Handle file text
       });
 
-      if (!response.ok) throw new Error("Genesis failed");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error(errorData.error || "Genesis failed");
+      }
       
       const generatedPersona = await response.json();
       setPersona(generatedPersona);
       updatePersona(generatedPersona);
-    } catch (error) {
-      console.error("Failed to generate twin:", error);
+    } catch (error: any) {
+      console.error("Failed to generate twin:", error.message);
       // Fallback to local build if AI fails
       const fallback = buildPersona(answers);
       setPersona(fallback);

@@ -13,7 +13,13 @@ export async function POST(request: Request) {
     }
 
     const prompt = TWIN_GENESIS_PROMPT(answers, uploadedText);
+    console.log("Calling Gemini for Twin Genesis...");
     const response = await generateGeminiText(prompt);
+
+    if (!response.text) {
+      console.error("Gemini returned empty text for Genesis");
+      return NextResponse.json({ error: "Empty AI response" }, { status: 500 });
+    }
 
     let personaData;
     try {
@@ -21,12 +27,14 @@ export async function POST(request: Request) {
       const jsonMatch = response.text.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         personaData = JSON.parse(jsonMatch[0]);
+        console.log("Successfully parsed persona JSON");
       } else {
+        console.error("No JSON block found in Gemini response:", response.text);
         throw new Error("No JSON found in response");
       }
     } catch (e) {
       console.error("Failed to parse Gemini response:", e);
-      return NextResponse.json({ error: "Failed to synthesize persona" }, { status: 500 });
+      return NextResponse.json({ error: "Failed to synthesize persona: Invalid JSON structure" }, { status: 500 });
     }
 
     // Map the AI response to the TwinPersona type
