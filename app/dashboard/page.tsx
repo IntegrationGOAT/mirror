@@ -52,11 +52,11 @@ const seedLogs: DailyLog[] = [
 export default function DashboardPage() {
   const { hydrated, logs, addLog, latestLog } = useMirrorStore();
   const [latestScore, setLatestScore] = useState(50);
-  const [latestCommentary, setLatestCommentary] = useState<string | undefined>(seedLogs[0]?.twin_commentary);
-  const [latestTimestamp, setLatestTimestamp] = useState<string | undefined>(new Date().toISOString());
-  const [scoreAnimating, setScoreAnimating] = useState(false);
+  const [latestCommentary, setLatestCommentary] = useState<string | undefined>(undefined);
+  const [latestTimestamp, setLatestTimestamp] = useState<string | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const visibleLogs = logs.length > 0 ? logs : seedLogs;
+  const visibleLogs = logs;
 
   const lastSeven = useMemo(
     () =>
@@ -69,41 +69,44 @@ export default function DashboardPage() {
 
   if (!hydrated) {
     return (
-      <main className="flex min-h-screen items-center justify-center text-[var(--text-secondary)]">
-        Loading Mirror...
-      </main>
+      <div className="flex min-h-screen items-center justify-center bg-[var(--bg-primary)]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-[var(--accent-purple)] border-t-transparent" />
+          <p className="text-sm font-bold uppercase tracking-[0.4em] text-[var(--text-secondary)]">Syncing Mirror...</p>
+        </div>
+      </div>
     );
   }
 
   return (
-    <>
+    <div className="min-h-screen bg-[var(--bg-primary)] bg-[radial-gradient(ellipse_at_top_right,rgba(124,58,237,0.05),transparent_50%),radial-gradient(ellipse_at_bottom_left,rgba(59,111,255,0.05),transparent_50%)]">
       <Navbar />
-      <main className="mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-7xl gap-6 px-4 py-6 lg:grid-cols-[minmax(0,0.86fr)_minmax(0,1.1fr)_minmax(0,0.86fr)]">
-        <Card className="space-y-5">
+      <main className="mx-auto grid max-w-7xl gap-6 px-6 py-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_minmax(0,1fr)]">
+        <Card className="flex flex-col gap-6 border-white/5 bg-white/[0.02] backdrop-blur-xl">
           <div>
-            <p className="text-xs uppercase tracking-[0.34em] text-[var(--text-secondary)]">Log Today</p>
-            <h1 className="mt-2 text-2xl font-semibold text-white">You Today</h1>
+            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[var(--text-secondary)]">Input Layer</p>
+            <h1 className="mt-2 text-3xl font-bold text-white tracking-tight">Daily Sync</h1>
           </div>
           <DailyLogForm
             onSubmit={async ({ mood, goalStatus, decisionMade, notes, timeSpent, commentary }) => {
-              const nextScore = mood === 5 ? 24 : mood === 4 ? 36 : mood === 3 ? 52 : mood === 2 ? 68 : 82;
-              const response = await fetch("/api/divergence", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  logData: {
-                    mood,
-                    decision_made: decisionMade,
-                    time_spent: timeSpent,
-                    goal_status: goalStatus,
-                    notes,
-                  },
-                }),
-              });
+              setIsLoading(true);
+              try {
+                const response = await fetch("/api/divergence", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    logData: {
+                      mood,
+                      decision_made: decisionMade,
+                      time_spent: timeSpent,
+                      goal_status: goalStatus,
+                      notes,
+                    },
+                  }),
+                });
 
-              const payload = (await response.json()) as { divergence_score: number; commentary: string; logId: string };
-              setScoreAnimating(true);
-              window.setTimeout(() => {
+                const payload = (await response.json()) as { divergence_score: number; commentary: string; logId: string };
+                
                 const createdLog: DailyLog = {
                   id: payload.logId,
                   user_id: "demo-user",
@@ -113,34 +116,44 @@ export default function DashboardPage() {
                   time_spent: timeSpent,
                   goal_status: goalStatus,
                   notes: notes || null,
-                  divergence_score: payload.divergence_score ?? nextScore,
-                  twin_commentary: payload.commentary || commentary,
+                  divergence_score: payload.divergence_score,
+                  twin_commentary: payload.commentary,
                 };
 
                 addLog(createdLog);
-                setLatestScore(createdLog.divergence_score ?? nextScore);
-                setLatestCommentary(createdLog.twin_commentary ?? commentary);
+                setLatestScore(createdLog.divergence_score ?? 50);
+                setLatestCommentary(createdLog.twin_commentary ?? undefined);
                 setLatestTimestamp(new Date().toISOString());
-                setScoreAnimating(false);
-              }, 150);
+              } finally {
+                setIsLoading(false);
+              }
             }}
           />
         </Card>
 
-        <Card className="flex flex-col items-center justify-between gap-6">
+        <Card className="flex flex-col items-center justify-between gap-10 border-white/5 bg-white/[0.02] backdrop-blur-xl py-10">
           <DivergenceGauge
             score={latestLog?.divergence_score ?? latestScore}
-            animatedScore={scoreAnimating ? 50 : latestLog?.divergence_score ?? latestScore}
-            emptyState={visibleLogs.length === 0}
+            animatedScore={isLoading ? 50 : latestLog?.divergence_score ?? latestScore}
+            emptyState={visibleLogs.length === 0 && !latestCommentary}
+            loading={isLoading}
           />
-          <div className="flex w-full items-center justify-center gap-2">
+          <div className="flex w-full items-center justify-center gap-3 px-4">
             {lastSeven.map((entry) => (
               <div
                 key={entry.date}
                 title={`${formatDateLabel(entry.date)} · ${entry.score}%`}
-                className="h-3 w-3 rounded-full"
-                style={{ background: entry.score <= 30 ? "var(--success)" : entry.score <= 60 ? "var(--warning)" : "var(--danger)" }}
-              />
+                className="h-2 w-full rounded-full bg-white/5 overflow-hidden"
+              >
+                 <div 
+                  className="h-full transition-all duration-1000"
+                  style={{ 
+                    width: '100%',
+                    background: entry.score <= 30 ? "var(--success)" : entry.score <= 60 ? "var(--warning)" : "var(--danger)",
+                    boxShadow: `0 0 10px ${entry.score <= 30 ? "var(--success)" : entry.score <= 60 ? "var(--warning)" : "var(--danger)"}44`
+                  }}
+                />
+              </div>
             ))}
           </div>
         </Card>
@@ -148,9 +161,10 @@ export default function DashboardPage() {
         <TwinTakePanel
           commentary={latestCommentary ?? latestLog?.twin_commentary ?? undefined}
           timestamp={latestTimestamp ?? latestLog?.log_date}
-          history={visibleLogs.slice(-3).map((entry) => `${formatDateLabel(entry.log_date)}: ${entry.twin_commentary ?? "No commentary yet."}`)}
+          loading={isLoading}
+          history={visibleLogs.slice(-3).reverse().map((entry) => `${formatDateLabel(entry.log_date)}: ${entry.twin_commentary ?? "No commentary yet."}`)}
         />
       </main>
-    </>
+    </div>
   );
 }

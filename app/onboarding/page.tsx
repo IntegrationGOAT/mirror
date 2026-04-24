@@ -59,6 +59,7 @@ function buildPersona(answers: OnboardingAnswers): TwinPersona {
 }
 
 export default function OnboardingPage() {
+  const { updatePersona } = useMirrorStore();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<OnboardingAnswers>(initialAnswers);
   const [fileName, setFileName] = useState<string | null>(null);
@@ -87,7 +88,7 @@ export default function OnboardingPage() {
 
   const questionKey = useMemo(() => Object.keys(initialAnswers)[step] as keyof OnboardingAnswers, [step]);
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (step < questions.length - 1) {
       setStep((current) => current + 1);
       return;
@@ -99,10 +100,28 @@ export default function OnboardingPage() {
     }
 
     setIsGenerating(true);
-    window.setTimeout(() => {
-      setPersona(buildPersona(answers));
+    
+    try {
+      const response = await fetch("/api/twin/genesis", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answers, uploadedText: "" }), // TODO: Handle file text
+      });
+
+      if (!response.ok) throw new Error("Genesis failed");
+      
+      const generatedPersona = await response.json();
+      setPersona(generatedPersona);
+      updatePersona(generatedPersona);
+    } catch (error) {
+      console.error("Failed to generate twin:", error);
+      // Fallback to local build if AI fails
+      const fallback = buildPersona(answers);
+      setPersona(fallback);
+      updatePersona(fallback);
+    } finally {
       setIsGenerating(false);
-    }, 1800);
+    }
   };
 
   if (persona) {

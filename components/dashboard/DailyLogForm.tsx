@@ -82,15 +82,22 @@ export function DailyLogForm({ onSubmit }: DailyLogFormProps) {
 
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-3">
-          <p className="text-xs uppercase tracking-[0.34em] text-(--text-secondary)">Time I spent on</p>
-          <button type="button" className="text-sm text-(--accent-cyan)">Add +</button>
+          <p className="text-xs uppercase tracking-[0.34em] text-[var(--text-secondary)]">Time I spent on</p>
+          <button
+            type="button"
+            className="text-sm font-medium text-[var(--accent-cyan)] transition-colors hover:text-[var(--accent-cyan-bright)]"
+            onClick={() => setActivities((current) => [...current, { activity: "", hours: "" }])}
+          >
+            Add +
+          </button>
         </div>
         <div className="space-y-3">
           {activities.map((entry, index) => (
-            <div key={index} className="grid grid-cols-[1fr_96px] gap-3">
+            <div key={index} className="group grid grid-cols-[1fr_96px] gap-3">
               <Input
                 placeholder="Activity"
                 value={entry.activity}
+                className="bg-white/5 transition-all focus:bg-white/10"
                 onChange={(event) => {
                   const value = event.target.value;
                   setActivities((current) =>
@@ -103,6 +110,7 @@ export function DailyLogForm({ onSubmit }: DailyLogFormProps) {
               <Input
                 placeholder="Hours"
                 value={entry.hours}
+                className="bg-white/5 transition-all focus:bg-white/10"
                 onChange={(event) => {
                   const value = event.target.value;
                   setActivities((current) =>
@@ -118,7 +126,7 @@ export function DailyLogForm({ onSubmit }: DailyLogFormProps) {
       </div>
 
       <div>
-        <p className="text-xs uppercase tracking-[0.34em] text-(--text-secondary)">Goal status</p>
+        <p className="text-xs uppercase tracking-[0.34em] text-[var(--text-secondary)]">Goal status</p>
         <div className="mt-3 grid grid-cols-3 gap-2">
           {goalStatuses.map((status) => (
             <button
@@ -126,10 +134,10 @@ export function DailyLogForm({ onSubmit }: DailyLogFormProps) {
               type="button"
               onClick={() => setGoalStatus(status)}
               className={cn(
-                "rounded-2xl border px-3 py-3 text-sm font-semibold capitalize transition",
+                "rounded-2xl border px-3 py-3 text-sm font-semibold capitalize transition-all duration-300",
                 goalStatus === status
-                  ? "border-(--accent-blue) bg-[rgba(59,111,255,0.12)] text-white"
-                  : "border-white/10 bg-white/4 text-(--text-secondary) hover:bg-white/8",
+                  ? "border-[var(--accent-blue)] bg-[rgba(59,111,255,0.12)] text-white shadow-[0_0_20px_rgba(59,111,255,0.2)]"
+                  : "border-white/10 bg-white/4 text-[var(--text-secondary)] hover:bg-white/8 hover:border-white/20",
               )}
             >
               {status.replace("_", " ")}
@@ -138,17 +146,9 @@ export function DailyLogForm({ onSubmit }: DailyLogFormProps) {
         </div>
       </div>
 
-      <button
-        type="button"
-        className="text-sm text-[var(--accent-cyan)]"
-        onClick={() => setActivities((current) => [...current, { activity: "", hours: "" }])}
-      >
-        Add +
-      </button>
-
       <div>
-        <p className="text-xs uppercase tracking-[0.34em] text-(--text-secondary)">Notes</p>
-        <Textarea className="mt-3 min-h-24" value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Anything your twin should know?" />
+        <p className="text-xs uppercase tracking-[0.34em] text-[var(--text-secondary)]">Notes</p>
+        <Textarea className="mt-3 min-h-24 bg-white/5 transition-all focus:bg-white/10" value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Anything your twin should know?" />
       </div>
 
       <Button className="w-full">Submit Log</Button>

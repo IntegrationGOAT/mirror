@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import type { DailyLog, DebateMessage, ShadowDecision } from "@/types";
+import type { DailyLog, DebateMessage, ShadowDecision, TwinPersona } from "@/types";
 
 const LOGS_KEY = "mirror:logs";
 const DECISIONS_KEY = "mirror:decisions";
+const PERSONA_KEY = "mirror:persona";
 
 interface StoredShadowDecision extends ShadowDecision {
   created_at: string;
@@ -27,14 +28,21 @@ function readStorage<T>(key: string, fallback: T): T {
   }
 }
 
+const initialLogs: DailyLog[] = [
+  // ... (previous initial logs content)
+];
+
 export function useMirrorStore() {
   const [hydrated, setHydrated] = useState(false);
   const [logs, setLogs] = useState<DailyLog[]>([]);
   const [decisions, setDecisions] = useState<StoredShadowDecision[]>([]);
+  const [persona, setPersona] = useState<TwinPersona | null>(null);
 
   useEffect(() => {
-    setLogs(readStorage<DailyLog[]>(LOGS_KEY, []));
+    const storedLogs = readStorage<DailyLog[]>(LOGS_KEY, []);
+    setLogs(storedLogs.length > 0 ? storedLogs : initialLogs);
     setDecisions(readStorage<StoredShadowDecision[]>(DECISIONS_KEY, []));
+    setPersona(readStorage<TwinPersona | null>(PERSONA_KEY, null));
     setHydrated(true);
   }, []);
 
@@ -53,6 +61,14 @@ export function useMirrorStore() {
 
     window.localStorage.setItem(DECISIONS_KEY, JSON.stringify(decisions));
   }, [decisions, hydrated]);
+
+  useEffect(() => {
+    if (!hydrated) {
+      return;
+    }
+
+    window.localStorage.setItem(PERSONA_KEY, JSON.stringify(persona));
+  }, [persona, hydrated]);
 
   const addLog = (log: DailyLog) => {
     setLogs((current) => [...current.filter((item) => item.id !== log.id), log]);
@@ -75,6 +91,10 @@ export function useMirrorStore() {
     );
   };
 
+  const updatePersona = (newPersona: TwinPersona) => {
+    setPersona(newPersona);
+  };
+
   const latestLog = useMemo(() => {
     if (logs.length === 0) {
       return null;
@@ -87,9 +107,11 @@ export function useMirrorStore() {
     hydrated,
     logs,
     decisions,
+    persona,
     latestLog,
     addLog,
     addDecision,
     updateDecisionHistory,
+    updatePersona,
   };
 }
