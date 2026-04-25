@@ -4,11 +4,21 @@ export interface GeminiTextResponse {
 
 const geminiModel = "gemini-2.5-flash";
 
+function getGeminiApiKey(): string | undefined {
+  return (
+    process.env.GEMINI_API_KEY?.trim() ||
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY?.trim() ||
+    process.env.GOOGLE_API_KEY?.trim()
+  );
+}
+
 export async function generateGeminiText(prompt: string): Promise<GeminiTextResponse> {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = getGeminiApiKey();
 
   if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is missing in environment variables.");
+    throw new Error(
+      "Missing Gemini API key. Set GEMINI_API_KEY, GOOGLE_GENERATIVE_AI_API_KEY, or GOOGLE_API_KEY.",
+    );
   }
 
   const response = await fetch(
